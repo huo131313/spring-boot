@@ -265,12 +265,35 @@ public class SpringApplication {
 		// 判断应用的类型， classpass 里是否实现了相应的接口 ，
 		// 1：reactive 2: servlet 3 none
 		this.webApplicationType = deduceWebApplicationType();
+
 		// 首先从Spring.Factory 里获取 ApplicationContextInitializer 接口的实现 根据sorter 排序
 		// 为初始化上下文作准备， 初始化上下文的依据
+		/*
+		 org.springframework.boot.context.config.DelegatingApplicationContextInitializer
+		 org.springframework.boot.context.ContextIdApplicationContextInitializer
+		 org.springframework.boot.context.ConfigurationWarningsApplicationContextInitializer //用来报告Spring容器的一些常见的错误配置的
+		 org.springframework.boot.web.context.ServerPortInfoApplicationContextInitializer
+		 org.springframework.boot.autoconfigure.SharedMetadataReaderFactoryContextInitializer
+		 org.springframework.boot.autoconfigure.logging.ConditionEvaluationReportLoggingListener
+		 */
 		setInitializers((Collection) getSpringFactoriesInstances(
 				ApplicationContextInitializer.class));
 
+		/*
+		org.springframework.boot.context.config.ConfigFileApplicationListener,
+		org.springframework.boot.context.config.AnsiOutputApplicationListener,
+		org.springframework.boot.context.logging.LoggingApplicationListener,
+		org.springframework.boot.context.logging.ClasspathLoggingApplicationListener,
+		org.springframework.boot.autoconfigure.BackgroundPreinitializer,
+		org.springframework.boot.context.config.DelegatingApplicationListener,
+		org.springframework.boot.builder.ParentContextCloserApplicationListener,
+		org.springframework.boot.ClearCachesApplicationListener,
+		org.springframework.boot.context.FileEncodingApplicationListener,
+		org.springframework.boot.liquibase.LiquibaseServiceLocatorApplicationListener
+		 */
 		setListeners((Collection) getSpringFactoriesInstances(ApplicationListener.class));
+
+		//设置启动类 main class
 		this.mainApplicationClass = deduceMainApplicationClass();
 	}
 
@@ -323,7 +346,11 @@ public class SpringApplication {
 					applicationArguments);
 			configureIgnoreBeanInfo(environment);
 			Banner printedBanner = printBanner(environment);
+
+			// default for web : 	  AnnotationConfigServletWebServerApplicationContext
+			// default for reactive : AnnotationConfigReactiveWebServerApplicationContext
 			context = createApplicationContext();
+
 			exceptionReporters = getSpringFactoriesInstances(
 					SpringBootExceptionReporter.class,
 					new Class[] { ConfigurableApplicationContext.class }, context);
@@ -415,8 +442,14 @@ public class SpringApplication {
 
 	private SpringApplicationRunListeners getRunListeners(String[] args) {
 		Class<?>[] types = new Class<?>[] { SpringApplication.class, String[].class };
-		return new SpringApplicationRunListeners(logger, getSpringFactoriesInstances(
-				SpringApplicationRunListener.class, types, this, args));
+//		return new SpringApplicationRunListeners(logger, getSpringFactoriesInstances(
+//				SpringApplicationRunListener.class, types, this, args));
+
+		Collection instances = getSpringFactoriesInstances(
+				SpringApplicationRunListener.class, types, this, args);
+		System.out.println(instances);
+
+		return new SpringApplicationRunListeners(logger, instances);
 	}
 
 	private <T> Collection<T> getSpringFactoriesInstances(Class<T> type) {
@@ -778,6 +811,10 @@ public class SpringApplication {
 		runners.addAll(context.getBeansOfType(ApplicationRunner.class).values());
 		runners.addAll(context.getBeansOfType(CommandLineRunner.class).values());
 		AnnotationAwareOrderComparator.sort(runners);
+
+		System.out.println("Runners:");
+		System.out.println(runners);
+
 		for (Object runner : new LinkedHashSet<>(runners)) {
 			if (runner instanceof ApplicationRunner) {
 				callRunner((ApplicationRunner) runner, args);
