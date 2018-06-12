@@ -262,9 +262,14 @@ public class SpringApplication {
 		this.resourceLoader = resourceLoader;
 		Assert.notNull(primarySources, "PrimarySources must not be null");
 		this.primarySources = new LinkedHashSet<>(Arrays.asList(primarySources));
+		// 判断应用的类型， classpass 里是否实现了相应的接口 ，
+		// 1：reactive 2: servlet 3 none
 		this.webApplicationType = deduceWebApplicationType();
+		// 首先从Spring.Factory 里获取 ApplicationContextInitializer 接口的实现 根据sorter 排序
+		// 为初始化上下文作准备， 初始化上下文的依据
 		setInitializers((Collection) getSpringFactoriesInstances(
 				ApplicationContextInitializer.class));
+
 		setListeners((Collection) getSpringFactoriesInstances(ApplicationListener.class));
 		this.mainApplicationClass = deduceMainApplicationClass();
 	}
