@@ -337,18 +337,25 @@ public class SpringApplication {
 		ConfigurableApplicationContext context = null;
 		Collection<SpringBootExceptionReporter> exceptionReporters = new ArrayList<>();
 		configureHeadlessProperty();
+
+		//通过 getSpringFactoriesInstances SpringApplicationRunListener.class 创建Listeners
+		//org.springframework.boot.context.event.EventPublishingRunListener
 		SpringApplicationRunListeners listeners = getRunListeners(args);
 		listeners.starting();
+
 		try {
 
-			//封装命令行参数
+			//封装命令行参数 例如 设置端口号： java -jar MySpringBoot.jar --server.port=8000
 			ApplicationArguments applicationArguments = new DefaultApplicationArguments(
 					args);
+			//把前面创建出来的listeners和命令行参数，传递到prepareEnvironment函数中来准备运行环境
 			ConfigurableEnvironment environment = prepareEnvironment(listeners,
 					applicationArguments);
+
 			configureIgnoreBeanInfo(environment);
 			Banner printedBanner = printBanner(environment);
 
+			//创建了容器
 			//web应用 : 	     AnnotationConfigServletWebServerApplicationContext
 			//reactive应用 : AnnotationConfigReactiveWebServerApplicationContext
 			//普通应用 ：     AnnotationConfigApplicationContext
@@ -358,12 +365,13 @@ public class SpringApplication {
 					SpringBootExceptionReporter.class,
 					new Class[] { ConfigurableApplicationContext.class }, context);
 
-
+			//准备容器上下文
 			prepareContext(context, environment, listeners, applicationArguments,
 					printedBanner);
-
+			//刷新容器上下文
 			refreshContext(context);
 
+			//扩展点 现在是空的
 			afterRefresh(context, applicationArguments);
 
 			stopWatch.stop();
@@ -400,6 +408,7 @@ public class SpringApplication {
 		ConfigurableEnvironment environment = getOrCreateEnvironment();
 
 		configureEnvironment(environment, applicationArguments.getSourceArgs());
+
 		//发布了EnvirongmentPreparedEvent事件
 		listeners.environmentPrepared(environment);
 
@@ -416,15 +425,21 @@ public class SpringApplication {
 	private void prepareContext(ConfigurableApplicationContext context,
 			ConfigurableEnvironment environment, SpringApplicationRunListeners listeners,
 			ApplicationArguments applicationArguments, Banner printedBanner) {
+		//把环境绑定到上下文中
 		context.setEnvironment(environment);
+		//该方法对 context 设置了 ResourceLoader 和 ClassLoader，并向 bean 工厂中注册了一个beanNameGenerator 。
 		postProcessApplicationContext(context);
+		//ApplicationContextInitializer里面的定义的资源应用到上下文，关键代码在getInitializers()函数
 		applyInitializers(context);
+		//发送一个已经准备的信号给listener，跟踪过去发现默认实现是空的。
 		listeners.contextPrepared(context);
+
 		if (this.logStartupInfo) {
 			logStartupInfo(context.getParent() == null);
 			logStartupProfileInfo(context);
 		}
 
+		//注册了springApplicationArguments和springBootBanner的单例到bean工厂
 		// Add boot specific singleton beans
 		context.getBeanFactory().registerSingleton("springApplicationArguments",
 				applicationArguments);
@@ -436,6 +451,8 @@ public class SpringApplication {
 		Set<Object> sources = getAllSources();
 		Assert.notEmpty(sources, "Sources must not be empty");
 		load(context, sources.toArray(new Object[0]));
+
+
 		listeners.contextLoaded(context);
 	}
 
@@ -747,6 +764,10 @@ public class SpringApplication {
 			logger.debug(
 					"Loading source " + StringUtils.arrayToCommaDelimitedString(sources));
 		}
+
+		// 首先getBeanDefinitionRegistry函数获取了bean定义的注册表，
+		// 然后调用createBeanDefinitionLoader创建出BeanDefinitionLoader，
+		// 在loader做了进一步设置以后，调用loader.load()函数，把资源全部加载
 		BeanDefinitionLoader loader = createBeanDefinitionLoader(
 				getBeanDefinitionRegistry(context), sources);
 		if (this.beanNameGenerator != null) {

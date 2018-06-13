@@ -158,7 +158,9 @@ public class ServletWebServerApplicationContext extends GenericWebApplicationCon
 
 	@Override
 	protected void finishRefresh() {
+		//
 		super.finishRefresh();
+		//上下文里 启动 web 容器
 		WebServer webServer = startWebServer();
 		if (webServer != null) {
 			publishEvent(new ServletWebServerInitializedEvent(webServer, this));
