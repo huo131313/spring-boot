@@ -340,6 +340,8 @@ public class SpringApplication {
 		SpringApplicationRunListeners listeners = getRunListeners(args);
 		listeners.starting();
 		try {
+
+			//封装命令行参数
 			ApplicationArguments applicationArguments = new DefaultApplicationArguments(
 					args);
 			ConfigurableEnvironment environment = prepareEnvironment(listeners,
@@ -347,23 +349,31 @@ public class SpringApplication {
 			configureIgnoreBeanInfo(environment);
 			Banner printedBanner = printBanner(environment);
 
-			// default for web : 	  AnnotationConfigServletWebServerApplicationContext
-			// default for reactive : AnnotationConfigReactiveWebServerApplicationContext
+			//web应用 : 	     AnnotationConfigServletWebServerApplicationContext
+			//reactive应用 : AnnotationConfigReactiveWebServerApplicationContext
+			//普通应用 ：     AnnotationConfigApplicationContext
 			context = createApplicationContext();
 
 			exceptionReporters = getSpringFactoriesInstances(
 					SpringBootExceptionReporter.class,
 					new Class[] { ConfigurableApplicationContext.class }, context);
+
+
 			prepareContext(context, environment, listeners, applicationArguments,
 					printedBanner);
+
 			refreshContext(context);
+
 			afterRefresh(context, applicationArguments);
+
 			stopWatch.stop();
+
 			if (this.logStartupInfo) {
 				new StartupInfoLogger(this.mainApplicationClass)
 						.logStarted(getApplicationLog(), stopWatch);
 			}
 			listeners.started(context);
+
 			callRunners(context, applicationArguments);
 		}
 		catch (Throwable ex) {
@@ -385,10 +395,16 @@ public class SpringApplication {
 			SpringApplicationRunListeners listeners,
 			ApplicationArguments applicationArguments) {
 		// Create and configure the environment
+
+		//Servlet程序 ： StandardServletEnvironment  其它：StandardEnvironment
 		ConfigurableEnvironment environment = getOrCreateEnvironment();
+
 		configureEnvironment(environment, applicationArguments.getSourceArgs());
+		//发布了EnvirongmentPreparedEvent事件
 		listeners.environmentPrepared(environment);
+
 		bindToSpringApplication(environment);
+
 		if (this.webApplicationType == WebApplicationType.NONE) {
 			environment = new EnvironmentConverter(getClassLoader())
 					.convertToStandardEnvironmentIfNecessary(environment);
@@ -513,7 +529,13 @@ public class SpringApplication {
 	 */
 	protected void configureEnvironment(ConfigurableEnvironment environment,
 			String[] args) {
+
+		//在这个方法中，默认情况下，main方法中没有传参的时候是不进行任何操作的。
 		configurePropertySources(environment, args);
+
+		//此方法是根据AbstractEnvirongment中的activeProfiles属性，
+		// 以及SpringApplication的additionalProfiles属性重新设置AbstractEnvirongment属性，
+		// 因为这两个属性都为空，所以重新设置的值还是为空。
 		configureProfiles(environment, args);
 	}
 
