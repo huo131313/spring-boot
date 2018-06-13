@@ -177,6 +177,8 @@ public class ServletWebServerApplicationContext extends GenericWebApplicationCon
 		WebServer webServer = this.webServer;
 		ServletContext servletContext = getServletContext();
 		if (webServer == null && servletContext == null) {
+			// 根据 Bean Type 查找 web 容器, 实现接口： ServletWebServerFactory 只能有一个
+			// tomcat: org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactory
 			ServletWebServerFactory factory = getWebServerFactory();
 			this.webServer = factory.getWebServer(getSelfInitializer());
 		}
