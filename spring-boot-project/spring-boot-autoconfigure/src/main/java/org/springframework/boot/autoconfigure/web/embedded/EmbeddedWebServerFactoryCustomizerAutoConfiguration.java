@@ -46,6 +46,7 @@ public class EmbeddedWebServerFactoryCustomizerAutoConfiguration {
 	@ConditionalOnClass({ Tomcat.class, UpgradeProtocol.class })
 	public static class TomcatWebServerFactoryCustomizerConfiguration {
 
+		//  Tomcat 容器定制化信息  application.properties 里 server.tomcat 开头的配置
 		@Bean
 		public TomcatWebServerFactoryCustomizer tomcatWebServerFactoryCustomizer(
 				Environment environment, ServerProperties serverProperties) {
@@ -60,7 +61,7 @@ public class EmbeddedWebServerFactoryCustomizerAutoConfiguration {
 	@Configuration
 	@ConditionalOnClass({ Server.class, Loader.class, WebAppContext.class })
 	public static class JettyWebServerFactoryCustomizerConfiguration {
-
+		//  Jetty 容器定制化信息  application.properties 里 server.Jetty 开头的配置
 		@Bean
 		public JettyWebServerFactoryCustomizer jettyWebServerFactoryCustomizer(
 				Environment environment, ServerProperties serverProperties) {
@@ -75,7 +76,7 @@ public class EmbeddedWebServerFactoryCustomizerAutoConfiguration {
 	@Configuration
 	@ConditionalOnClass({ Undertow.class, SslClientAuthMode.class })
 	public static class UndertowWebServerFactoryCustomizerConfiguration {
-
+		//  Jetty 容器定制化信息  application.properties 里 server.Undertow 开头的配置
 		@Bean
 		public UndertowWebServerFactoryCustomizer undertowWebServerFactoryCustomizer(
 				Environment environment, ServerProperties serverProperties) {
