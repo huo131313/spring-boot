@@ -57,6 +57,10 @@ public class WebServerFactoryCustomizerBeanPostProcessor
 	@Override
 	public Object postProcessBeforeInitialization(Object bean, String beanName)
 			throws BeansException {
+		// 实现了 Aware 接口，  Bean 实例化后都要执行这个处理，
+		// 类名后缀 BeanPostProcessor， 也验证了上面的话：Bean 实例化后都要执行这个处理
+		// 判断了这个处理只对 WebServerFactory 工厂类处理，
+		// 加载 application.properties 关于server的配置， 实现定制化
 		if (bean instanceof WebServerFactory) {
 			postProcessBeforeInitialization((WebServerFactory) bean);
 		}
@@ -71,6 +75,7 @@ public class WebServerFactoryCustomizerBeanPostProcessor
 
 	@SuppressWarnings("unchecked")
 	private void postProcessBeforeInitialization(WebServerFactory webServerFactory) {
+		// 把定制web容器参数写入 web server factory
 		LambdaSafe
 				.callbacks(WebServerFactoryCustomizer.class, getCustomizers(),
 						webServerFactory)
@@ -78,11 +83,13 @@ public class WebServerFactoryCustomizerBeanPostProcessor
 				.invoke((customizer) -> customizer.customize(webServerFactory));
 	}
 
+	//获取web容器参数
 	private Collection<WebServerFactoryCustomizer<?>> getCustomizers() {
 		if (this.customizers == null) {
 			// Look up does not include the parent context
 			this.customizers = new ArrayList<>(getWebServerFactoryCustomizerBeans());
 			this.customizers.sort(AnnotationAwareOrderComparator.INSTANCE);
+			System.out.println(this.customizers);
 			this.customizers = Collections.unmodifiableList(this.customizers);
 		}
 		return this.customizers;
@@ -90,6 +97,18 @@ public class WebServerFactoryCustomizerBeanPostProcessor
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	private Collection<WebServerFactoryCustomizer<?>> getWebServerFactoryCustomizerBeans() {
+		// ServletWebServerFactoryAutoConfiguration类 定义了@Bean
+		// 实现了接口 WebServerFactoryCustomizer.class
+		// 通用的：ServletWebServerFactoryCustomizer
+		// 只针对 Tomcat 的： TomcatServletWebServerFactoryCustomizer
+
+		/*test Tomcat:
+		org.springframework.boot.autoconfigure.websocket.servlet.TomcatWebSocketServletWebServerCustomizer
+		org.springframework.boot.autoconfigure.web.servlet.ServletWebServerFactoryCustomizer
+		org.springframework.boot.autoconfigure.web.servlet.TomcatServletWebServerFactoryCustomizer
+		org.springframework.boot.autoconfigure.web.embedded.TomcatWebServerFactoryCustomizer
+		org.springframework.boot.autoconfigure.web.servlet.HttpEncodingAutoConfiguration$LocaleCharsetMappingsCustomizer
+		*/
 		return (Collection) this.beanFactory
 				.getBeansOfType(WebServerFactoryCustomizer.class, false, false).values();
 	}

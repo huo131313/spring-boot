@@ -78,6 +78,7 @@ public class ServletWebServerFactoryAutoConfiguration {
 	 * Registers a {@link WebServerFactoryCustomizerBeanPostProcessor}. Registered via
 	 * {@link ImportBeanDefinitionRegistrar} for early registration.
 	 */
+	//这个是干什么的呢？ 为什么要提前呢
 	public static class BeanPostProcessorsRegistrar
 			implements ImportBeanDefinitionRegistrar, BeanFactoryAware {
 

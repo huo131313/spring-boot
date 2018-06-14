@@ -50,6 +50,9 @@ import org.springframework.context.annotation.Configuration;
  */
 class ServletWebServerFactoryConfiguration {
 
+	//web容器工厂 bean 定义的地方: Tomcat Jetty Undertow
+	//ServletWebServerApplicationContext.createWebServer() 方法调用
+
 	@Configuration
 	@ConditionalOnClass({ Servlet.class, Tomcat.class, UpgradeProtocol.class })
 	@ConditionalOnMissingBean(value = ServletWebServerFactory.class, search = SearchStrategy.CURRENT)
