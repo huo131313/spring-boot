@@ -76,6 +76,7 @@ public class ServletContextInitializerBeans
 
 	public ServletContextInitializerBeans(ListableBeanFactory beanFactory) {
 		this.initializers = new LinkedMultiValueMap<>();
+		//dispatcherServletRegistration:org.springframework.boot.web.servlet.ServletRegistrationBean
 		addServletContextInitializerBeans(beanFactory);
 		addAdaptableBeans(beanFactory);
 		List<ServletContextInitializer> sortedInitializers = new ArrayList<>();
@@ -87,8 +88,10 @@ public class ServletContextInitializerBeans
 	}
 
 	private void addServletContextInitializerBeans(ListableBeanFactory beanFactory) {
+
 		for (Entry<String, ServletContextInitializer> initializerBean : getOrderedBeansOfType(
 				beanFactory, ServletContextInitializer.class)) {
+			logger.debug("ServletContextInitializerBeans: " + initializerBean.getKey() + ":" + initializerBean.getValue());
 			addServletContextInitializerBean(initializerBean.getKey(),
 					initializerBean.getValue(), beanFactory);
 		}

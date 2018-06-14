@@ -51,6 +51,7 @@ class TomcatStarter implements ServletContainerInitializer {
 			throws ServletException {
 		try {
 			for (ServletContextInitializer initializer : this.initializers) {
+				System.out.println(initializer);
 				initializer.onStartup(servletContext);
 			}
 		}
