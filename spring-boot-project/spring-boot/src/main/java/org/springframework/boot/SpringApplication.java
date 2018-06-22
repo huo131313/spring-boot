@@ -430,6 +430,7 @@ public class SpringApplication {
 		//该方法对 context 设置了 ResourceLoader 和 ClassLoader，并向 bean 工厂中注册了一个beanNameGenerator 。
 		postProcessApplicationContext(context);
 		//ApplicationContextInitializer里面的定义的资源应用到上下文，关键代码在getInitializers()函数
+		//Initializer 初始化上下文
 		applyInitializers(context);
 		//发送一个已经准备的信号给listener，跟踪过去发现默认实现是空的。
 		listeners.contextPrepared(context);
@@ -707,6 +708,13 @@ public class SpringApplication {
 			Class<?> requiredType = GenericTypeResolver.resolveTypeArgument(
 					initializer.getClass(), ApplicationContextInitializer.class);
 			Assert.isInstanceOf(requiredType, context, "Unable to call initializer.");
+			logger.info("applyInitializers: " + initializer);
+			//org.springframework.boot.context.config.DelegatingApplicationContextInitializer 取配置 context.initializer.classes
+			//org.springframework.boot.context.ContextIdApplicationContextInitializer  取配置 spring.application.name
+			//org.springframework.boot.context.ConfigurationWarningsApplicationContextInitializer 注解ComponentScan不能扫描：org.springframework / org
+			//org.springframework.boot.web.context.ServerPortInfoApplicationContextInitializer    上下文加listener , 取配置：server.ports
+			//org.springframework.boot.autoconfigure.SharedMetadataReaderFactoryContextInitializer 上下文加：ConfigurationClassPostProcessor
+			//org.springframework.boot.autoconfigure.logging.ConditionEvaluationReportLoggingListener 上下文加： ConditionEvaluationReportListener
 			initializer.initialize(context);
 		}
 	}
